@@ -114,6 +114,18 @@ test('base64 attachments are stored and only served to authorized callers', asyn
   assert.deepEqual(Buffer.from(await res.arrayBuffer()), png);
 });
 
+test('uploaded HTML downloads in a sandbox instead of running as the reviewer', async () => {
+  const sub = await hub.call('POST', '/api/items', { key, body: {
+    project: 'Website', title: 'Sneaky file',
+    attachments: [{ data: Buffer.from('<script>fetch("/api/keys")</script>').toString('base64'), name: 'page.html', mime_type: 'text/html' }],
+  } });
+  const path = new URL(sub.body.attachments[0].url).pathname;
+  const res = await fetch(hub.base + path, { headers: { cookie } });
+  assert.equal(res.status, 200);
+  assert.match(res.headers.get('content-disposition') || '', /^attachment/);
+  assert.match(res.headers.get('content-security-policy') || '', /sandbox/);
+});
+
 test('revoked keys stop working', async () => {
   const k = hub.store.createKey('Temporary agent');
   assert.equal((await hub.call('GET', '/api/items', { key: k.key })).status, 200);

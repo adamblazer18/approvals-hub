@@ -52,16 +52,20 @@ function auth(req, res, next) {
 }
 const adminOnly = (req, res, next) => (req.isAdmin ? next() : res.status(403).json({ error: 'admin only' }));
 
-let failures = 0;
+// Failed sign-ins slow down per client address, so one attacker can't lock the reviewer out.
+const failures = new Map();
+const digest = (s) => crypto.createHash('sha256').update(String(s)).digest();
 app.post('/login', express.urlencoded({ extended: false }), async (req, res) => {
   const pw = String(req.body.password || '');
-  const ok = pw.length === ADMIN_PASSWORD.length && crypto.timingSafeEqual(Buffer.from(pw), Buffer.from(ADMIN_PASSWORD));
+  const ok = crypto.timingSafeEqual(digest(pw), digest(ADMIN_PASSWORD));
   if (!ok) {
-    failures++;
-    await new Promise((r) => setTimeout(r, Math.min(failures, 10) * 400));
+    const n = (failures.get(req.ip) || 0) + 1;
+    failures.set(req.ip, n);
+    if (failures.size > 10000) failures.clear();
+    await new Promise((r) => setTimeout(r, Math.min(n, 10) * 400));
     return res.redirect('/login?e=1');
   }
-  failures = 0;
+  failures.delete(req.ip);
   res.cookie('sess', makeSession(), { httpOnly: true, sameSite: 'lax', secure: req.secure, maxAge: 30 * 864e5 });
   res.redirect('/');
 });
@@ -137,11 +141,19 @@ api.delete('/keys/:id', adminOnly, wrap((req, res) => { store.revokeKey(req.para
 app.use('/api', api);
 
 // Uploaded files: only for the reviewer's session or a valid agent key.
+const INLINE_TYPES = new Set(['.png', '.jpg', '.jpeg', '.gif', '.webp', '.avif', '.mp4', '.mov', '.webm', '.m4v', '.mp3', '.wav', '.m4a', '.aac', '.ogg', '.pdf']);
 app.get('/files/:name', auth, (req, res) => {
   const name = path.basename(req.params.name);
   const p = path.join(store.DATA_DIR, 'uploads', name);
   if (!fs.existsSync(p)) return res.status(404).end();
-  if (name.endsWith('.svg')) res.set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+  // Images, audio, video and PDFs display inline. Anything else (HTML, scripts, unknown types) downloads,
+  // and is sandboxed in case a browser renders it anyway, so an uploaded file can't act as the reviewer.
+  const ext = path.extname(name).toLowerCase();
+  if (ext === '.svg') res.set('Content-Security-Policy', "default-src 'none'; style-src 'unsafe-inline'");
+  else if (!INLINE_TYPES.has(ext)) {
+    res.set('Content-Security-Policy', 'sandbox; default-src \'none\'');
+    res.attachment(name);
+  }
   res.set('Cache-Control', 'private, max-age=31536000, immutable');
   res.sendFile(p);
 });

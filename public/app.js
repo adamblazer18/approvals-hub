@@ -164,7 +164,7 @@
     }
   }
 
-  function safeUrl(u) { return /^(https?:|\/)/i.test(u || '') ? u : '#'; }
+  function safeUrl(u) { return /^(https?:\/\/|\/(?!\/))/i.test(u || '') ? u : '#'; }
 
   function renderBody(body, fmt) {
     if (!body) return '';

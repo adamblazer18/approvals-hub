@@ -1,5 +1,7 @@
 # Approvals hub
 
+[![CI](https://github.com/adamblazer18/approvals-hub/actions/workflows/ci.yml/badge.svg)](https://github.com/adamblazer18/approvals-hub/actions/workflows/ci.yml)
+
 A review queue for AI agents. Agents submit work over MCP or REST: artwork, copy, emails, either-or decisions. You approve it, edit it, or send it back with a note, from your desk or your phone. The agent picks up your decision on its next run and carries on.
 
 ![Reviewing a queue of agent work: picking an option, approving, sending an email back with a note](docs/demo.gif)
@@ -8,7 +10,7 @@ A review queue for AI agents. Agents submit work over MCP or REST: artwork, copy
 
 I'm the only engineer at [FinalPeace](https://finalpeace.co). A team of AI agents does the work of a ten-person team across development and marketing: ads, emails, landing pages and product fixes. The bottleneck stopped being the work and became me. Agents would stop mid-task to ask a question in a chat I wasn't looking at, or ship something I'd have changed.
 
-So every agent sends finished work here instead, keeps going on something else, and checks back for my answer. I approve what they ship in about half an hour a day. The same hub serves agents across my other projects, each with its own key.
+So every agent sends finished work here instead, keeps going on something else, and checks back for my answer. I approve what they ship in about half an hour a day. I've run it since September 2026, and the same hub serves agents across my other projects, each with its own key.
 
 ## How it works
 
@@ -109,9 +111,9 @@ It's built to be fast from the keyboard: `j`/`k` to move, `a` approve, `c` reque
 
 This is a single-reviewer tool, meant to sit behind HTTPS on your own server.
 
-- One reviewer password, compared in constant time, with a growing delay after failed attempts. Sessions are HMAC-signed cookies (`httpOnly`, `sameSite=lax`).
+- One reviewer password, compared in constant time, with a growing delay after failed attempts from the same address. Sessions are HMAC-signed cookies (`httpOnly`, `sameSite=lax`).
 - Agent keys are random 192-bit tokens stored only as hashes. A key can be scoped to one project, and it can submit, read and withdraw but never decide. Only the reviewer can approve.
-- Uploaded files are served only to the reviewer or a valid key. SVGs get a restrictive Content-Security-Policy. Markdown and HTML bodies are sanitized with DOMPurify before rendering.
+- Uploaded files are served only to the reviewer or a valid key. Images, audio, video and PDFs display inline; anything else, such as HTML, downloads with a sandboxing Content-Security-Policy, so an uploaded file can never act as the reviewer. SVGs get a restrictive policy of their own. Markdown and HTML bodies are sanitized with DOMPurify before rendering.
 - Decision callbacks are signed: `x-approvals-signature: sha256=<HMAC of the exact body>` when `WEBHOOK_SECRET` is set. Callback URLs must be http(s).
 - The key-in-URL form (`/mcp/apk_...`) exists because some MCP connectors can't set headers. Treat that URL like the key itself. Prefer the `Authorization` header where your client supports it.
 
@@ -132,7 +134,7 @@ This is a single-reviewer tool, meant to sit behind HTTPS on your own server.
 npm test
 ```
 
-The tests start the hub on a random port with a throwaway database and cover the full loop over REST and over a real MCP client: submit, decide, pick up once, revisions, option choices, project-scoped keys, revoked keys, upload access and callback signatures. CI runs them on Node 22 and 24.
+The tests start the hub on a random port with a throwaway database and cover the full loop over REST and over a real MCP client: submit, decide, pick up once, revisions, option choices, project-scoped keys, revoked keys, upload access, upload sandboxing and callback signatures. CI runs them on Node 22 and 24, and also builds the Docker image and checks that it starts.
 
 ## License
 
