@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#f6f5f2" media="(prefers-color-scheme: light)">
+<title>Approvals</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231f7a4d'/><path d='M9 16.5l4.5 4.5L23 11.5' stroke='white' stroke-width='3.2' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+<link rel="stylesheet" href="/styles.css">
+<script src="/vendor/marked.js" defer></script>
+<script src="/vendor/purify.js" defer></script>
+<script src="/app.js" defer></script>
+</head>
+<body>
+<div id="app" class="app">
+  <header class="topbar">
+    <button class="icon-btn only-mobile" id="navToggle" aria-label="Projects">☰</button>
+    <div class="brand"><span class="brand-mark">✓</span> Approvals</div>
+    <div class="top-count" id="topCount"></div>
+    <div class="grow"></div>
+    <input class="search" id="search" type="search" placeholder="Search" aria-label="Search items">
+    <button class="icon-btn" id="helpBtn" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts">?</button>
+    <button class="icon-btn" id="settingsBtn" title="Projects and agent keys" aria-label="Settings">⚙</button>
+  </header>
+
+  <nav class="rail" id="rail">
+    <div class="rail-section">
+      <button class="rail-item" data-status="pending">Waiting on you <span class="n" id="n-pending"></span></button>
+      <button class="rail-item" data-status="changes_requested">Sent back <span class="n" id="n-changes"></span></button>
+      <button class="rail-item" data-status="decided">Decided</button>
+      <button class="rail-item" data-status="all">Everything</button>
+    </div>
+    <div class="rail-label">Projects</div>
+    <div class="rail-section" id="projectList"></div>
+  </nav>
+
+  <section class="list" id="list" aria-label="Items"></section>
+
+  <main class="detail" id="detail" aria-live="polite"></main>
+</div>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="icon-btn lb-close" aria-label="Close">✕</button>
+  <button class="icon-btn lb-prev" aria-label="Previous">‹</button>
+  <figure><img alt=""><figcaption></figcaption></figure>
+  <button class="icon-btn lb-next" aria-label="Next">›</button>
+</div>
+
+<dialog id="settings" class="modal"></dialog>
+<dialog id="help" class="modal small">
+  <h2>Keyboard shortcuts</h2>
+  <dl class="keys">
+    <dt><kbd>j</kbd> / <kbd>k</kbd></dt><dd>Next / previous item</dd>
+    <dt><kbd>a</kbd></dt><dd>Approve</dd>
+    <dt><kbd>c</kbd></dt><dd>Request changes (needs a note)</dd>
+    <dt><kbd>r</kbd></dt><dd>Reject (needs a note)</dd>
+    <dt><kbd>n</kbd></dt><dd>Jump to the note field</dd>
+    <dt><kbd>e</kbd></dt><dd>Edit the copy yourself</dd>
+    <dt><kbd>1</kbd>–<kbd>9</kbd></dt><dd>Pick an option</dd>
+    <dt><kbd>⌘</kbd>+<kbd>Enter</kbd></dt><dd>From the note: send back for changes</dd>
+    <dt><kbd>u</kbd></dt><dd>Undo the last decision</dd>
+    <dt><kbd>Esc</kbd></dt><dd>Leave a text field</dd>
+  </dl>
+  <form method="dialog"><button class="btn">Close</button></form>
+</dialog>
+
+<div class="toast" id="toast" hidden></div>
+</body>
+</html>

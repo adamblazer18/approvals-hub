@@ -1,0 +1,17 @@
+services:
+  approvals:
+    build: .
+    ports:
+      - "3060:3060"
+    environment:
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?set ADMIN_PASSWORD}
+      SESSION_SECRET: ${SESSION_SECRET:-}
+      PUBLIC_URL: ${PUBLIC_URL:-http://localhost:3060}
+      REVIEWER_NAME: ${REVIEWER_NAME:-}
+      WEBHOOK_SECRET: ${WEBHOOK_SECRET:-}
+      DISCORD_WEBHOOK_URL: ${DISCORD_WEBHOOK_URL:-}
+    volumes:
+      - approvals-data:/data
+    restart: unless-stopped
+volumes:
+  approvals-data:

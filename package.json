@@ -1,0 +1,33 @@
+{
+  "name": "approvals-hub",
+  "version": "1.0.0",
+  "description": "A review queue for AI agents: they submit work over MCP or REST, you approve, edit or send it back, and they pick up your decision.",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "seed:demo": "node scripts/seed-demo.js",
+    "create-key": "node src/cli.js create-key",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.31.0",
+    "cookie-parser": "^1.4.7",
+    "dompurify": "^3.4.16",
+    "express": "^5.2.1",
+    "marked": "^18.0.14",
+    "multer": "^2.4.0",
+    "zod": "^4.6.5"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "license": "MIT",
+  "keywords": [
+    "mcp",
+    "ai-agents",
+    "human-in-the-loop",
+    "approvals",
+    "claude"
+  ],
+  "private": true
+}

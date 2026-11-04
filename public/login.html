@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Approvals · Sign in</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body class="login">
+  <form method="post" action="/login" class="login-card">
+    <div class="brand"><span class="brand-mark">✓</span> Approvals</div>
+    <p class="muted">Everything your agents are waiting on, in one queue.</p>
+    <label for="pw">Password</label>
+    <input id="pw" type="password" name="password" autocomplete="current-password" autofocus required>
+    <p class="error" id="err" hidden>That password didn't work.</p>
+    <button class="btn primary" type="submit">Sign in</button>
+  </form>
+  <script>if (location.search.includes('e=1')) document.getElementById('err').hidden = false;</script>
+</body>
+</html>
